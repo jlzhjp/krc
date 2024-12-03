@@ -1,5 +1,8 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define STACK_LIMIT 64
 
 enum State {
     INIT,
@@ -13,12 +16,17 @@ enum State {
     STRING_ESCAPE,
 };
 
-/* Write a program to remove all coments from a C program.
-   Don't forget to handle quoted strings and character constants properly.
-   C comments do not nest. */
+bool is_paired(char left, char right);
+
+/* Write a program to check a C program for rudimentary syntax
+   errors like unbalanced parentheses, brackets and braces. Don't forget about
+   quotes, both single and double, escape sequences, and comments. (This program
+   is hard if you do it in full generality). */
 int main()
 {
     enum State s = INIT;
+    char stack[STACK_LIMIT];
+    int stack_top = 0;
 
     int ch;
     while ((ch = getchar()) != EOF) {
@@ -26,54 +34,49 @@ int main()
         case INIT:
             if (ch == '/') {
                 s = WAITING_ASTERISK;
-                continue;
             } else if (ch == '"') {
                 s = IN_STRING;
             } else if (ch == '\'') {
                 s = IN_CHAR;
+            } else if (ch == '(' || ch == '[' || ch == '{') {
+                stack[stack_top++] = ch;
+            } else if (ch == ')' || ch == ']' || ch == '}') {
+                char left_pair = stack[--stack_top];
+                if (!is_paired(left_pair, ch)) {
+                    fprintf(stderr, "unbalanced\n");
+                    exit(1);
+                }
             }
             break;
         case WAITING_ASTERISK:
             if (ch == '*') {
                 s = IN_COMMENT;
-                continue;
             } else if (ch == '/') {
-                putchar('/');
-                continue;
             } else {
-                putchar('/');
                 s = INIT;
             }
             break;
         case IN_COMMENT:
             if (ch == '*') {
                 s = WAITING_SLASH;
-                continue;
             } else if (ch == '/') {
                 s = IN_COMMENT_WAITING_ASTERISK;
-                continue;
-            } else {
-                continue;
             }
             break;
         case IN_COMMENT_WAITING_ASTERISK:
             if (ch == '*') {
-                fprintf(stderr, "comments do not nest\n");
+                fprintf(stderr, "comments do not nest");
                 exit(1);
             } else if (ch == '/') {
-                continue;
             } else {
                 s = IN_COMMENT;
             }
         case WAITING_SLASH:
             if (ch == '/') {
                 s = INIT;
-                continue;
             } else if (ch == '*') {
-                continue;
             } else {
                 s = IN_COMMENT;
-                continue;
             }
             break;
         case IN_STRING:
@@ -97,7 +100,20 @@ int main()
             s = IN_STRING;
             break;
         }
-
-        putchar(ch);
     }
+
+    if (stack_top != 0) {
+        fprintf(stderr, "unbalanced\n");
+        exit(1);
+    }
+
+    return 0;
+}
+
+bool is_paired(char left_pair, char right_pair)
+{
+    if (left_pair == '(' && right_pair == ')') return true;
+    if (left_pair == '[' && right_pair == ']') return true;
+    if (left_pair == '{' && right_pair == '}') return true;
+    return false;
 }
