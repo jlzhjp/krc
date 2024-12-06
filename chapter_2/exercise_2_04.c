@@ -23,9 +23,13 @@ void squeeze(char s1[], char s2[])
     s1[j] = '\0';
 }
 
+/** Write an alternate version of squeeze(s1, s2) that deletes
+    each character in s1 that matches any character in string s2. */
 int main()
 {
     char s[16] = "abcabc";
     squeeze(s, "ab");
     printf("%s", s);
+
+    return 0;
 }
