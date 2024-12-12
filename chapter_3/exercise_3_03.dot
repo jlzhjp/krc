@@ -1,0 +1,15 @@
+digraph exercise_3_03 {
+    fontname="sans-serif"
+    rankdir=LR
+    node [shape=doublecircle] INIT, END
+    node [shape=circle]
+    INIT -> START [label="isalnum(c)"]
+    INIT -> INIT [label="else"]
+
+    START -> DASH_ACC [label="'-'"]
+    START -> START [label="isalnum(c)"]
+    START -> INIT [label="else"]
+
+    DASH_ACC -> END [label="isalnum(c)"]
+    DASH_ACC -> INIT [label="else"]
+}
