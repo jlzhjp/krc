@@ -1,6 +1,6 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #define MAXOP  100 /* max size of operand or operator */
 #define NUMBER '0' /* signal that a number was found */
@@ -39,15 +39,6 @@ int main()
                 push(pop() / op2);
             } else {
                 printf("error: zero divisor\n");
-            }
-            break;
-        case '%':
-            op2 = pop();
-            double op1 = pop();
-            if (op1 >= 0) {
-                push((int)op1 % (int)op2);
-            } else {
-                push((int)op1 % (int)op2 + (int)op2);
             }
             break;
         case '\n':
@@ -119,19 +110,21 @@ int getop(char s[])
 
 #define BUFSIZE 100
 
-char buf[BUFSIZE]; /* buffer for ungetch */
-int bufp = 0; /* next free position in buf */
+char buf = -1;
 
 int getch(void)
 {
-    return (bufp > 0) ? buf[--bufp] : getchar();
+    if (buf == -1) return getchar();
+    char res = buf;
+    buf = -1;
+    return res;
 }
 
 void ungetch(int c) /* push character back on input */
 {
-    if (bufp >= BUFSIZE) {
+    if (buf != -1) {
         printf("ungetch: too many characters\n");
     } else {
-        buf[bufp++] = c;
+        buf = c;
     }
 }
